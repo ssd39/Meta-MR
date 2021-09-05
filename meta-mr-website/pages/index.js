@@ -1,0 +1,464 @@
+import Head from 'next/head'
+import styles from '../styles/Home.module.css'
+import { useState, useEffect } from 'react';
+import {  Button, Radio, Input,Spin,message } from 'antd';
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  clusterApiUrl,
+} from "@solana/web3.js";
+import { NFTStorage, File } from 'nft.storage'
+import UploadHelper from '../Component/UploadHelper'
+
+const centerDiv = {display: 'flex', alignItems:'center',justifyContent:'center', flexDirection:'column'};
+
+const anchor = require("../dist/esm");
+
+const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDYzZTcxN2EwODU4Yzg1ZTlBM2VDRGFlMzMxNjlkM2VlNjVkRmQ2NTQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMDgzODkyNTk4NCwibmFtZSI6InNvbGFuYWJ1aWxkb3V0In0.dHrmInv1XXC1bP0yzxSB1C9j8IurrMhZrZALLWvxXsQ";
+
+const getProvider = () => {
+  if ("solana" in window) {
+    const provider = window.solana;
+    if (provider.isPhantom) {
+      return provider;
+    }
+  }
+  return null;
+};
+
+
+
+
+const storedata=async (jObj)=>{
+  const client = new NFTStorage({ token: apiKey })
+  const metadata = await client.store(jObj)
+  return metadata;
+}
+
+export default function Home() {
+  
+  const [radioV, setradioV] = useState("a");
+  const [isload, setload] = useState(false);
+
+
+  const [avenue, setavenue] = useState("");
+  const [adate, setadate] = useState("");
+  const [aimg, setaimg] = useState("");
+  const [agname, setagname] = useState("");
+  const [agadd, setagadd] = useState("");
+  const [agcon, setagcon] = useState("");
+  const [agsig, setagsig] = useState("");
+  const [agimg, setagimag] = useState("");
+  const [abname, setabname] = useState("");
+  const [abadd, setabadd] = useState("");
+  const [absig, setabsig] = useState("");
+  const [abcon, setabcon] = useState("");
+  const [abimg, setabimg] = useState("");
+  const [wim, setwim] = useState("ag");
+  const [fblob,setfblob] = useState("")
+  const [acout,setacout] = useState("") 
+ 
+  const [bcid,setbcid] = useState("") 
+
+
+  const [coath,setcoath] = useState("")
+  const [co,setco] = useState("")
+  
+  const [dpubk, setdpubk] = useState("");
+  const [flink, setflink] = useState("");
+  const [mmsg, setmmsg] = useState("");
+
+
+
+
+  const NETWORK = clusterApiUrl("devnet");
+  const connection = new Connection(NETWORK);
+
+  const programId = new anchor.web3.PublicKey('5Gk3CRrGiowBEUTHyZHEg82zcm51JYMcrqHy1CEEAm82');
+  const program = new anchor.Program({
+    "version": "0.0.0",
+    "name": "basic_1",
+    "instructions": [
+      {
+        "name": "initialize",
+        "accounts": [
+          {
+            "name": "myAccount",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "user",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "partner",
+            "isMut": false,
+            "isSigner": false
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "data",
+            "type": "string"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "name": "MyAccount",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "data",
+              "type": "string"
+            },
+            {
+              "name": "partner",
+              "type": "publicKey"
+            }
+          ]
+        }
+      }
+    ],
+    "metadata": {
+      "address": "5Gk3CRrGiowBEUTHyZHEg82zcm51JYMcrqHy1CEEAm82"
+    }
+  }, programId);
+
+  const createTransferTransaction = async (cid, pubk) => {
+    let provider =getProvider();
+    if (!provider.publicKey) {
+      return;
+    }
+
+    try{
+      await program.account.myAccount.fetch(getProvider().publicKey)
+      isExsist=true;
+    }catch(e){
+
+    }
+    let tx =null;
+    tx = await program.transaction.initialize(cid,{
+    accounts: {
+      myAccount: getProvider().publicKey,
+      user: getProvider().publicKey,
+      partner: new PublicKey(pubk),
+      systemProgram: anchor.web3.SystemProgram.programId,
+    },
+    signers: [getProvider().publicKey],
+    }
+  );
+    
+
+    let transaction = new Transaction().add(
+      tx
+    );
+    transaction.feePayer = provider.publicKey;
+    transaction.recentBlockhash = (
+      await connection.getRecentBlockhash()
+    ).blockhash;
+    return transaction;
+  };
+
+  
+  useEffect(() => { 
+      anchor.setProvider(anchor.Provider.local('https://api.devnet.solana.com'))
+      window.solana.connect();
+      window.solana.on("connect", () => {
+        console.log("PubKey:"+getProvider().publicKey)
+        if(wim=="ag"){
+          setagadd(getProvider().publicKey)
+        }else{
+          setabadd(getProvider().publicKey)
+        }
+    })
+      
+  },[]);
+
+  return (
+    <div className={styles.container}>
+      <Head>
+        <title>Generate 3D Metaverse NFT Mairrage Certificate</title>
+        <meta name="description" content="Generated by create next app" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className={styles.main}>
+        <span className={styles.title_text}>Certificate Utility</span>
+        <div style={{'margin':10}}></div>
+        <Radio.Group defaultValue="a" buttonStyle="solid" onChange={(e)=>{
+          console.log(e.target.value)
+          setradioV(e.target.value)
+        }}>
+          <Radio.Button value="a">Create</Radio.Button>
+          <Radio.Button value="b">Join</Radio.Button>
+          <Radio.Button value="c">Consent</Radio.Button>
+          <Radio.Button value="d">Validate</Radio.Button>
+        </Radio.Group>
+        <div style={{'margin':10}}></div>
+        {radioV=="a" && (<div style={{display:'flex',flexDirection:'column'}}>
+          <div>
+            <span style={{fontSize:18}}>Marriage Details</span>
+            <div style={{margin:4}}></div>
+            <Input placeholder="Venue" value={avenue} onChange={(e)=>{
+                  setavenue(e.target.value)
+                }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="Date" value={adate} onChange={(e)=>{
+                  setadate(e.target.value)
+                }} />
+            <div style={{margin:3}}></div>
+            <span style={{fontSize:10}}>Photo</span>
+            <div style={{margin:1}}></div>
+            <UploadHelper iurl={aimg} handleData={async (data)=>{ 
+                setfblob(data)
+                let a= {
+                  name: 'Couple Photo',
+                  description: 'Couple Photo For Meta-MR',
+                  image: data
+                };
+                let meta_data = await storedata(a);
+                console.log(meta_data)
+                let img_ = meta_data.data.image.pathname.split("/")
+                let pimg_ = img_.slice(3,img_.length).join("/")  
+                console.log("https://"+img_[2]+".ipfs.infura-ipfs.io/"+pimg_)
+                setaimg("https://"+img_[2]+".ipfs.dweb.link/"+pimg_)
+                return "https://"+img_[2]+".ipfs.dweb.link/"+pimg_
+             }}></UploadHelper>
+            <div style={{margin:3}}></div>
+          </div>
+          <div>
+            <span style={{fontSize:12}}>I am ...</span>
+            
+              <div>
+                <Radio.Group defaultValue="ag" buttonStyle="solid" onChange={(e)=>{
+                console.log(e.target.value)
+                if(e.target.value=="ag"){
+                  if(abadd==getProvider().publicKey){
+                    setabadd("")
+                  }
+                  setagadd(getProvider().publicKey)
+                }else{
+                  if(agadd==getProvider().publicKey){
+                    setagadd("")
+                  }
+                  setabadd(getProvider().publicKey)
+                }
+                setwim(e.target.value);
+              }}>
+                <Radio.Button value="ag">Groom</Radio.Button>
+                <Radio.Button value="ab">Bride</Radio.Button>
+              </Radio.Group>
+            </div>
+            <div style={{margin:3}}></div>
+          </div>
+          <div>
+            <span style={{fontSize:18}}>Bride</span>
+            <div style={{margin:4}}></div>
+            <Input placeholder="Name" value={abname} onChange={(e)=>{
+                  setabname(e.target.value)
+                }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="PublicKey" value={abadd} onChange={(e)=>{
+                  setabadd(e.target.value)
+            }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="Consent Message" value={abcon} onChange={(e)=>{
+                  setabcon(e.target.value)
+            }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="Consent Signature" value={absig} onChange={(e)=>{
+                  setabsig(e.target.value)
+            }} />
+            <div style={{margin:3}}></div>
+            <span style={{fontSize:10}}>Photo</span>
+            <div style={{margin:1}}></div>
+            <UploadHelper iurl={abimg} handleData={async (data)=>{ 
+                let a= {
+                  name: 'Bride Photo',
+                  description: 'Bride Photo For Meta-MR',
+                  image: data
+                };
+                let meta_data = await storedata(a);
+                let img_ = meta_data.data.image.pathname.split("/")
+                let pimg_ =img_.slice(3,img_.length).join("/")
+                   
+                console.log("https://"+img_[2]+".ipfs.infura-ipfs.io/"+pimg_)
+                setabimg("https://"+img_[2]+".ipfs.dweb.link/"+pimg_)
+                return "https://"+img_[2]+".ipfs.dweb.link/"+pimg_;
+             }}></UploadHelper>
+            <div style={{margin:3}}></div>
+          </div>
+          <div>
+            <span style={{fontSize:18}}>Groom</span>
+            <div style={{margin:4}}></div>
+            <Input placeholder="Name" value={agname} onChange={(e)=>{
+                  setagname(e.target.value)
+                }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="PublicKey" value={agadd} onChange={(e)=>{
+                  setagadd(e.target.value)
+            }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="Consent Message" value={agcon} onChange={(e)=>{
+                  setagcon(e.target.value)
+            }} />
+            <div style={{margin:3}}></div>
+            <Input placeholder="Consent Signature" value={agsig} onChange={(e)=>{
+                  setagsig(e.target.value)
+            }} />
+            <span style={{fontSize:10}}>Photo</span>
+            <div style={{margin:1}}></div>
+            <UploadHelper iurl={agimg} handleData={async(data)=>{ 
+              let a= {
+                name: 'Groom Photo',
+                description: 'Groom Photo For Meta-MR',
+                image: data
+              };
+              let meta_data = await storedata(a);
+              let img_ = meta_data.data.image.pathname.split("/")
+              let pimg_ =img_.slice(3,img_.length).join("/")
+
+              console.log("https://"+img_[2]+".ipfs.infura-ipfs.io/"+pimg_)
+              setagimag("https://"+img_[2]+".ipfs.dweb.link/"+pimg_)
+              return "https://"+img_[2]+".ipfs.dweb.link/"+pimg_
+             }}></UploadHelper>
+            <div style={{margin:3}}>
+              
+            </div>
+            <span>Output:</span>
+            <Input placeholder="Certificate ID" value={acout} onChange={(e)=>{
+                  
+                }} />
+            <div style={{margin:4}}></div>
+          </div>
+          <Button type="primary" onClick={async ()=>{
+            setload(true)
+            let conf = {"b_add": abadd, "g_add": agadd.toString(), "bride": abname, "groom": agname, "b_oth": abcon, "g_oth": agcon, "b_img": abimg, "g_img": agimg, "c_img": aimg, "venue": avenue, "date": adate,"b_conset": absig, "g_conset": agsig};
+            
+            let meta_data = await storedata({...conf,   name: 'Certificate', description: 'This certificate generated by Meta-MR',   image: fblob });
+            console.log(meta_data)
+            let pubk= "";
+            if(wim=="ag"){
+              pubk=abadd;
+            }else{
+              pubk=agadd;
+            }
+            let tx = await createTransferTransaction(meta_data.ipnft, pubk)
+            console.log("Transaction: "+tx)
+            let signed = await getProvider().signTransaction(tx);
+            console.log(signed)
+            let signature = await connection.sendRawTransaction(signed.serialize());
+            await connection.confirmTransaction(signature);
+            setacout(meta_data.ipnft)
+            message.info('Certificate generated sucessfully.');
+            setload(false)
+
+          }}>Generate Certificate</Button>
+        </div>)}
+        {radioV=="b" && (<div style={{display:'flex',flexDirection:'column'}}>
+          <Input placeholder="Certificate Id" value={bcid} onChange={async (e)=>{
+                  setbcid(e.target.value)
+     
+                }} />
+            <div style={{margin:3}}></div>
+          <Button type="primary" onClick={async ()=>{
+            setload(true)
+            let data = await fetch(`https://${bcid}.ipfs.dweb.link/metadata.json`)
+            let r = await data.json()
+            let pubk ="";
+            console.log(r)
+            if(r.b_add==getProvider().publicKey.toString()){
+              pubk =r.g_add;
+            }else{
+              pubk = r.b_add;
+            }
+            let tx = await createTransferTransaction(bcid, pubk)
+            console.log("Transaction: "+tx)
+            let signed = await getProvider().signTransaction(tx);
+            console.log(signed)
+            let signature = await connection.sendRawTransaction(signed.serialize());
+            await connection.confirmTransaction(signature);
+            message.info('Attached To Certificate Sucessfully');
+            setload(false)
+
+          }}>Join Certificate</Button>
+        </div>)}
+        {radioV=="c" && (<div style={{display:'flex',flexDirection:'column'}}>
+          <Input placeholder="Your oath" value={coath} onChange={async (e)=>{
+                  setcoath(e.target.value)
+     
+                }} />
+            <div style={{margin:3}}></div>
+            <span>Output:</span>
+            <Input placeholder="Generated Signature" value={co} onChange={(e)=>{
+                  
+                }} />
+            <div style={{margin:4}}></div>
+          <Button type="primary" onClick={async ()=>{
+              const encodedMessage = new TextEncoder().encode(coath);
+              const signedMessage = await window.solana.signMessage(encodedMessage, "utf8");
+              console.log(signedMessage)
+              function buf2hex(buffer) { // buffer is an ArrayBuffer
+                return [...new Uint8Array(buffer)]
+                    .map(x => x.toString(16).padStart(2, '0'))
+                    .join('');
+              }
+              setco(buf2hex(signedMessage.signature.buffer))
+          }}>Generate Consent</Button>
+        </div>)}
+        {radioV=="d" && (<div style={{display:'flex', flexDirection:'column'}}>
+          
+              <Input placeholder="Groom/Bride PublicKey" value={dpubk} onChange={(e)=>{
+                setdpubk(e.target.value)
+              }} />
+              <div style={{margin:3}}></div>
+              {mmsg!="" && (<span style={{fontSize:16}}>{mmsg}</span>)}
+              {flink!="" && (<a href={flink} style={{fontSize:16}}>{flink}</a>)}
+              <div style={{margin:5}}></div>
+          <Button  type="primary" onClick={async ()=>{
+            setload(true)
+            try{
+              let d1 = await program.account.myAccount.fetch(dpubk);
+              console.log(d1)
+              let d2 = await program.account.myAccount.fetch(d1.partner)
+              console.log(d2)
+              let data =d1.data;
+              if(d2.partner==dpubk){
+                setmmsg('Your certificate is valid. Visit below link for your 3d wedding certificate.')
+                message.success('Your certificate is valid');
+                setflink("http://1996731052.rsc.cdn77.org/index.html?cid="+data)
+              }else{
+                setmmsg('Your certificate is invalid.')
+                message.error('Your certificate is invalid');
+              }
+            }catch(e){
+              console.log(e)
+              setmmsg('Your certificate is invalid')
+              message.error('Your certificate is invalid');
+            }
+            
+            setload(false)
+          }}>Get Record</Button>
+        </div>)}
+        <div style={{margin:10}}></div>
+
+        {isload &&  (<Spin size="large" />)}
+      </main>
+
+      <footer className={styles.footer}>
+      
+      </footer>
+    </div>
+  )
+}
